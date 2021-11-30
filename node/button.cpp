@@ -6,28 +6,26 @@
 #include <Arduino.h>
 #include "button.h"
 
-Button::Button(int _pin, int treshold) {
+Button::Button(int _pin, int treshold, int NCstate) {
   pin = _pin;
   pinMode(pin, INPUT_PULLUP);
-  digitalWrite(pin, HIGH);
   debounceDelay = treshold;
+  nc = NCstate;
 }
 
 boolean Button::Poll(unsigned long now) {
   state = digitalRead(pin);
   boolean res = false;
   if (state != lastState) {
+    lastState = state;
     lastDebounceTime = now;
   }
   idle = (now - lastDebounceTime);
   if (idle >= debounceDelay) {
-    if (state != _state) {
-      _state = state;
-      if (_state == LOW) {
-        res = true;
-      }
+    if (state == nc && (now - hit) >= 500) {
+      res = true;
+      hit = now;
     }
   }
-  lastState = state;
   return res;
 }

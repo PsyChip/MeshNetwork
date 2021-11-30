@@ -9,23 +9,23 @@
 void __HeaterOnStateChange(int state) {}
 
 Heater::Heater() {
+  pinMode(in_sensor, INPUT_PULLUP);
   pinMode(in_temp, INPUT);
   pinMode(out_display, OUTPUT);
   pinMode(out_fill, OUTPUT);
   pinMode(out_heat, OUTPUT);
   pinMode(out_drain, OUTPUT);
   Reset();
-  fill = new Button(in_fill, 100);
-  drain = new Button(in_drain, 100);
-  sensor = new Button(in_sensor, 500);
+  fill = new Button(in_fill, 100, LOW);
+  drain = new Button(in_drain, 100, LOW);
   onStateChange = &__HeaterOnStateChange;
   Reset();
 }
 
 void Heater::Start() {
   RainEx(false);
-  digitalWrite(out_display, LOW);
   digitalWrite(out_fill, LOW);
+  digitalWrite(out_display, LOW);
   state = 1;
 }
 
@@ -38,7 +38,10 @@ void Heater::Reset() {
 }
 
 void Heater::Stop() {
-  Reset();
+  digitalWrite(out_heat, HIGH);
+  digitalWrite(out_fill, HIGH);
+  digitalWrite(out_display, HIGH);
+  state = 0;
 }
 
 void Heater::Toggle() {
@@ -76,39 +79,46 @@ unsigned long Heater::StateTook() {
 }
 
 void Heater::Cycle(unsigned long now) {
+
   if (fill->Poll(now) == true) {
     Toggle();
-    return ;
+  }
+  if (drain->Poll(now) == true) {
+    Rain();
   }
 
-  if (drain->Poll(now) == true) {
-    Stop();
-    Rain();
-    return ;
-  }
+  full = ((digitalRead(in_sensor) == HIGH) ? true : false);
+  hot = ((digitalRead(in_temp) == HIGH) ? true : false);
 
   switch (state) {
     case 0: // standby
       break;
     case 1: // filling
-    case 2: // heating
-    case 3: // ready
-      full = sensor->Poll(now);
-      hot = ((digitalRead(in_temp) == HIGH) ? true : false);
       if (full == true) {
         digitalWrite(out_fill, HIGH);
-        if (hot == false) {
-          digitalWrite(out_heat, LOW);
-        } else {
-          digitalWrite(out_heat, HIGH);
-          state = 3;
-        }
+        digitalWrite(out_heat, LOW);
         state = 2;
-      } else {
+      }
+      break;
+    case 2: // heating
+      if (hot == true) {
         digitalWrite(out_heat, HIGH);
+        state = 3;
+      }
+      break;
+    case 3: // ready
+      if (full == false) {
         digitalWrite(out_fill, LOW);
         state = 1;
+        return ;
       }
+
+      if (hot == false) {
+        digitalWrite(out_heat, LOW);
+        state = 2;
+        return;
+      }
+
       break;
     case 4: // draining
       break;

@@ -45,20 +45,23 @@ void RemoteCommand(Command C) {
 void setup() {
   delay(50);
   Serial.begin(115200);
+  Serial.println("init");
   h = new Heater();
-  n = new GridNode(__nodeId);
-  h->onStateChange = &StateChange;
-  n->onCommand = &RemoteCommand;
+  //n = new GridNode(__nodeId);
+  //h->onStateChange = &StateChange;
+  //n->onCommand = &RemoteCommand;
   Watchdog();
+  Serial.println("begin");
 }
 
 void loop() {
   unsigned long now = millis();
-  n->Cycle(now);
   h->Cycle(now);
-  if ((now - statetimer) >= 30000) {
-    statetimer = now;
-    n->SendValue(0, sState, h->state);
-  }
+
+//  if ((now - statetimer) >= 250) {
+    //n->Cycle(now);
+    //statetimer = now;
+    //    n->SendValue(0, sState, h->state);
+  //}
   wdt_reset();
 }

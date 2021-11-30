@@ -5,11 +5,14 @@
 
 class Button {
   public:
-    Button(int _pin, int treshold);
+    Button(int _pin, int treshold,int NCstate);
     boolean Poll(unsigned long now);
     int pin;
     int state;
+    int nc;
     unsigned long idle;
+    unsigned long hit;
+    
   private:
     int _state;
     int lastState = LOW;

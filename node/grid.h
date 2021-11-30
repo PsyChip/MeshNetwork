@@ -9,7 +9,7 @@
 
 #define mesh_pin_1 9
 #define mesh_pin_2 10
-#define mesh_timeout 3000
+#define mesh_timeout 1000
 #define mesh_channel 126 // 1-127
 #define mesh_conn_check 3000
 #define network_key 957241

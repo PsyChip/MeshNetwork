@@ -11,8 +11,8 @@
 
 #define out_display A0
 #define out_fill A1
-#define out_heat A2
-#define out_drain A3
+#define out_heat A3
+#define out_drain A2
 
 enum {
   CmdStart = 1,
