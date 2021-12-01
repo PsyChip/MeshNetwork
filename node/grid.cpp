@@ -84,7 +84,7 @@ void GridNode::Receive() {
   }
 }
 
-void GridNode::Telemetry_(uint16_t address, int type, int value) {
+void GridNode::Send(uint16_t address, int type, int value) {
   Telemetry payload = {type, value};
   RF24NetworkHeader header(address, idTelemetry);
   network.write(header, &payload, szTelemetry);

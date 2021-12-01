@@ -88,7 +88,7 @@ class GridNode {
     uint16_t nodeID;
     GridNode(uint16_t nodeId);
     int Command_(uint16_t address, int cmd, unsigned long param);
-    void Telemetry_(uint16_t address, int type, int value);
+    void Send(uint16_t address, int type, int value);
     void Ping_(uint16_t address);
     void (*onCommand)(Command C);
     void (*onPong)(Pong p);

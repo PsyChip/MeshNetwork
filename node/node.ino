@@ -13,6 +13,7 @@ void setup() {
   n = new GridNode(address);
   h->onStateChange = &StateChange;
   n->onCommand = &RemoteCommand;
+  n->Send(00, sAc, 1);
   Watchdog();
 }
 
@@ -31,7 +32,7 @@ void Watchdog() {
 }
 
 void StateChange(int state) {
-  n->Telemetry_(0, sState, state);
+  n->Send(0, sState, state);
 }
 
 void RemoteCommand(Command C) {
