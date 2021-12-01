@@ -3,14 +3,23 @@
 #include "grid.h"
 #include "heater.h"
 
-#define __nodeId 1  // unique id, 0 for master
+uint16_t address = 01;
 
 GridNode *n;
 Heater *h;
-unsigned long statetimer = 0;
 
-ISR(WDT_vect) {
-  h->Reset();
+void setup() {
+  h = new Heater();
+  n = new GridNode(address);
+  h->onStateChange = &StateChange;
+  n->onCommand = &RemoteCommand;
+  Watchdog();
+}
+
+void loop() {
+  h->Cycle();
+  n->Cycle();
+  wdt_reset();
 }
 
 void Watchdog() {
@@ -22,7 +31,7 @@ void Watchdog() {
 }
 
 void StateChange(int state) {
-  n->SendValue(0, sState, state);
+  n->Telemetry_(0, sState, state);
 }
 
 void RemoteCommand(Command C) {
@@ -42,26 +51,6 @@ void RemoteCommand(Command C) {
   }
 }
 
-void setup() {
-  delay(50);
-  Serial.begin(115200);
-  Serial.println("init");
-  h = new Heater();
-  //n = new GridNode(__nodeId);
-  //h->onStateChange = &StateChange;
-  //n->onCommand = &RemoteCommand;
-  Watchdog();
-  Serial.println("begin");
-}
-
-void loop() {
-  unsigned long now = millis();
-  h->Cycle(now);
-
-//  if ((now - statetimer) >= 250) {
-    //n->Cycle(now);
-    //statetimer = now;
-    //    n->SendValue(0, sState, h->state);
-  //}
-  wdt_reset();
+ISR(WDT_vect) {
+  h->Reset();
 }

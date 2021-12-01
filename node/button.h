@@ -5,19 +5,25 @@
 
 class Button {
   public:
-    Button(int _pin, int treshold,int NCstate);
-    boolean Poll(unsigned long now);
+    Button(int _pin, int treshold, int NCstate);
+    boolean Poll(unsigned long now);    // used for buttons
+    boolean ReadPin(unsigned long now); // used for mechanical sensors
+    
     int pin;
-    int state;
-    int nc;
+    boolean state;
+    boolean nc;
     unsigned long idle;
     unsigned long hit;
-    
+
   private:
-    int _state;
-    int lastState = LOW;
+    boolean _state;
+    boolean lastState = LOW;
     unsigned long lastDebounceTime = 0;
     unsigned long debounceDelay = 300;
+
+    unsigned long cps;
+    int cfs;
+
 };
 
 #endif

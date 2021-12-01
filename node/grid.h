@@ -9,12 +9,12 @@
 
 #define mesh_pin_1 9
 #define mesh_pin_2 10
-#define mesh_timeout 1000
 #define mesh_channel 126 // 1-127
 #define mesh_conn_check 3000
 #define network_key 957241
 
-enum {
+PROGMEM enum {
+  // Telemetry types
   sTime = 1,    // real time clock
   sPir = 2,     // pir sensor
   sTemp = 3,    // temperature
@@ -43,7 +43,7 @@ enum {
   idCommand = 1,
   idAck = 2,
   idPing = 3,
-  idSensor = 4,
+  idTelemetry = 4,
 
   // command results
   AckOK = 1,    // command executed
@@ -54,7 +54,7 @@ enum {
 
 struct Command {
   unsigned int id;      // command number
-  unsigned int sender;  // sender id
+  uint16_t sender;      // sender id
   unsigned int cmd;     // command
   unsigned long param;  // parameter
   unsigned long crc;    // integrity check
@@ -72,35 +72,37 @@ struct Ping {
   bool pong;
 };
 
-struct Sensor {
+struct Pong {
+  uint16_t sender;
+  unsigned int ttl;
+  unsigned long uptime;
+};
+
+struct Telemetry {
   int type;             // sensor type class
   unsigned long value;  // value
 };
 
 class GridNode {
   public:
-    unsigned int nodeID;
-    GridNode(unsigned int nodeId);
-    void Cycle(unsigned long now);
-    int SendCommand(int node, int cmd, unsigned long param);
-    void SendValue(uint16_t address, int type, int value);
+    uint16_t nodeID;
+    GridNode(uint16_t nodeId);
+    int Command_(uint16_t address, int cmd, unsigned long param);
+    void Telemetry_(uint16_t address, int type, int value);
+    void Ping_(uint16_t address);
     void (*onCommand)(Command C);
-    void SendPing(uint8_t _nodeId);
-    void List();
+    void (*onPong)(Pong p);
+    void (*onAck)(Ack a);
+    void (*onTelemetry)(Telemetry t);
+    void Cycle();
   private:
-    unsigned long timer[2];
     unsigned long CommandNr = 1;
     unsigned long BuildCRC(Command cmd);
     unsigned long _crc[4];
     unsigned long lastMsg;
-    void Receive();
-    void SendPingEx(uint16_t address);
-    void SendAck(uint16_t addr, int cid, int result);
     void ProcessCommand(Command cmd, uint16_t sender);
-    void CheckConnection(unsigned long now);
-    void Broadcast(unsigned long now);
-    uint8_t AddrToId(uint16_t addr);
-    uint16_t IdToAddr(uint8_t nodeId);
+    void Ack_(uint16_t addr, int cid, int result);
+    void Receive();  
 };
 
 #endif

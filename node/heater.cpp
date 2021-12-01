@@ -9,8 +9,6 @@
 void __HeaterOnStateChange(int state) {}
 
 Heater::Heater() {
-  pinMode(in_sensor, INPUT_PULLUP);
-  pinMode(in_temp, INPUT);
   pinMode(out_display, OUTPUT);
   pinMode(out_fill, OUTPUT);
   pinMode(out_heat, OUTPUT);
@@ -18,7 +16,12 @@ Heater::Heater() {
   Reset();
   fill = new Button(in_fill, 100, LOW);
   drain = new Button(in_drain, 100, LOW);
+  sensor = new Button(in_sensor, 500, HIGH);
+
   onStateChange = &__HeaterOnStateChange;
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    readings[thisReading] = 0;
+  }
   Reset();
 }
 
@@ -74,12 +77,57 @@ void Heater::RainEx(bool _status) {
   }
 }
 
-unsigned long Heater::StateTook() {
+unsigned long Heater::idle() {
   return millis() - StateChange;
 }
 
-void Heater::Cycle(unsigned long now) {
+void Heater::ReadTemp() {
+  if (digitalRead(out_display) == HIGH) {
+    temperature = TempOff;
+    return ;
+  }
 
+  total = total - readings[readIndex];
+  readings[readIndex] = analogRead(in_temp);
+  total = total + readings[readIndex];
+  readIndex = readIndex + 1;
+  if (readIndex >= numReadings) {
+    readIndex = 0;
+  }
+  average = total / numReadings;
+  if (average >= temp_upper) {
+    temperature = TempHot;
+  }
+
+  if (average <= temp_lower) {
+    temperature = TempCold;
+  }
+}
+
+void Heater::ReadSensors() {
+  ReadTemp();
+  isFull = sensor->ReadPin(millis());
+}
+
+void Heater::CheckFallBack() {
+  if (idle() >= state_interval) {
+    if ((state == 2 || state == 3) && isFull == false) {
+      digitalWrite(out_heat, HIGH);
+      digitalWrite(out_fill, LOW);
+      state = 1;
+      return ;
+    }
+
+    if ((state == 3) && (temperature == TempCold)) {
+      digitalWrite(out_heat, LOW);
+      state = 2;
+      return ;
+    }
+  }
+}
+
+void Heater::Cycle() {
+  unsigned long now = millis();
   if (fill->Poll(now) == true) {
     Toggle();
   }
@@ -87,47 +135,40 @@ void Heater::Cycle(unsigned long now) {
     Rain();
   }
 
-  full = ((digitalRead(in_sensor) == HIGH) ? true : false);
-  hot = ((digitalRead(in_temp) == HIGH) ? true : false);
+  ReadSensors();
+  CheckFallBack();
 
   switch (state) {
-    case 0: // standby
+    case 0:
+      // standby
       break;
-    case 1: // filling
-      if (full == true) {
+    case 1:
+      // filling
+      if (isFull == true) {
         digitalWrite(out_fill, HIGH);
         digitalWrite(out_heat, LOW);
         state = 2;
       }
       break;
-    case 2: // heating
-      if (hot == true) {
+    case 2:
+      // heating
+      if (temperature == TempHot) {
         digitalWrite(out_heat, HIGH);
         state = 3;
       }
       break;
-    case 3: // ready
-      if (full == false) {
-        digitalWrite(out_fill, LOW);
-        state = 1;
-        return ;
-      }
-
-      if (hot == false) {
-        digitalWrite(out_heat, LOW);
-        state = 2;
-        return;
-      }
-
+    case 3:
+      // ready
       break;
-    case 4: // draining
+    case 4:
+      // draining
       break;
   }
 
   if (state != _state) {
     StateChange = now;
-    onStateChange(state);
     _state = state;
+    onStateChange(state);
   }
 
 }

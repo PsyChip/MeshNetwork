@@ -29,3 +29,16 @@ boolean Button::Poll(unsigned long now) {
   }
   return res;
 }
+
+
+boolean Button::ReadPin(unsigned long now) {
+  state = (digitalRead(pin) == nc ? true : false);
+  if (((now - cps) >= debounceDelay) && state == cfs) {
+    return state;
+  }
+  if (state != cfs) {
+    cps = now;
+    cfs = state;
+  }
+  return -1;
+}
