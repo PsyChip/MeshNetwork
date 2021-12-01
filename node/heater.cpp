@@ -86,21 +86,26 @@ void Heater::ReadTemp() {
     temperature = TempOff;
     return ;
   }
-
+  int tmp = analogRead(in_temp);
   total = total - readings[readIndex];
-  readings[readIndex] = analogRead(in_temp);
+  readings[readIndex] = tmp;
   total = total + readings[readIndex];
   readIndex = readIndex + 1;
   if (readIndex >= numReadings) {
     readIndex = 0;
   }
   average = total / numReadings;
-  if (average >= temp_upper) {
-    temperature = TempHot;
+ //Serial.println(average);
+  if (average >= temp_upper && temperature != TempCold) {
+    temperature = TempCold;
+    Serial.println("cold");
+    Serial.println(average);
   }
 
-  if (average <= temp_lower) {
-    temperature = TempCold;
+  if (average <= temp_lower && temperature != TempHot) {
+    temperature = TempHot;
+    Serial.println("hot");
+    Serial.println(average);
   }
 }
 

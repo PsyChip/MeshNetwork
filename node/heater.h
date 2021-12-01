@@ -14,13 +14,13 @@
 #define out_heat A3
 #define out_drain A2
 
-#define temp_upper 350
-#define temp_lower 5
-#define numReadings 10
+#define temp_upper 300
+#define temp_lower 120
+#define numReadings 64
 
 #define state_interval 3000 // don't let application switch states so fast
 
-enum {
+PROGMEM enum {
   CmdStart = 1,
   CmdStop = 2,
   CmdRain = 3,

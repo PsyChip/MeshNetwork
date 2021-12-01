@@ -15,6 +15,7 @@ void setup() {
   n->onCommand = &RemoteCommand;
   n->Send(00, sAc, 1);
   Watchdog();
+  Serial.begin(9600);
 }
 
 void loop() {
