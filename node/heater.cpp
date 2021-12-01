@@ -85,7 +85,7 @@ void Heater::ReadTemp() {
   if (digitalRead(out_display) == HIGH) {
     temperature = TempOff;
     return ;
-  }
+  } 
   int tmp = analogRead(in_temp);
   total = total - readings[readIndex];
   readings[readIndex] = tmp;
