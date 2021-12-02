@@ -11,29 +11,25 @@ void __HeaterOnStateChange(int state) {}
 Heater::Heater() {
   pinMode(out_display, OUTPUT);
   pinMode(out_fill, OUTPUT);
-  pinMode(out_heat, OUTPUT);
   pinMode(out_drain, OUTPUT);
+  pinMode(in_temp, INPUT);
   Reset();
   fill = new Button(in_fill, 100, LOW);
   drain = new Button(in_drain, 100, LOW);
   sensor = new Button(in_sensor, 500, HIGH);
 
   onStateChange = &__HeaterOnStateChange;
-  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
-    readings[thisReading] = 0;
-  }
+
   Reset();
 }
 
 void Heater::Start() {
   RainEx(false);
   digitalWrite(out_fill, LOW);
-  digitalWrite(out_display, LOW);
   state = 1;
 }
 
 void Heater::Reset() {
-  digitalWrite(out_heat, HIGH);
   digitalWrite(out_fill, HIGH);
   digitalWrite(out_display, HIGH);
   digitalWrite(out_drain, HIGH);
@@ -41,7 +37,6 @@ void Heater::Reset() {
 }
 
 void Heater::Stop() {
-  digitalWrite(out_heat, HIGH);
   digitalWrite(out_fill, HIGH);
   digitalWrite(out_display, HIGH);
   state = 0;
@@ -85,28 +80,9 @@ void Heater::ReadTemp() {
   if (digitalRead(out_display) == HIGH) {
     temperature = TempOff;
     return ;
-  } 
-  int tmp = analogRead(in_temp);
-  total = total - readings[readIndex];
-  readings[readIndex] = tmp;
-  total = total + readings[readIndex];
-  readIndex = readIndex + 1;
-  if (readIndex >= numReadings) {
-    readIndex = 0;
   }
-  average = total / numReadings;
- //Serial.println(average);
-  if (average >= temp_upper && temperature != TempCold) {
-    temperature = TempCold;
-    Serial.println("cold");
-    Serial.println(average);
-  }
-
-  if (average <= temp_lower && temperature != TempHot) {
-    temperature = TempHot;
-    Serial.println("hot");
-    Serial.println(average);
-  }
+  temperature = (digitalRead(in_temp) == HIGH ? TempHot : TempCold);
+  Serial.println(digitalRead(in_temp));
 }
 
 void Heater::ReadSensors() {
@@ -117,15 +93,9 @@ void Heater::ReadSensors() {
 void Heater::CheckFallBack() {
   if (idle() >= state_interval) {
     if ((state == 2 || state == 3) && isFull == false) {
-      digitalWrite(out_heat, HIGH);
+      digitalWrite(out_display, HIGH);
       digitalWrite(out_fill, LOW);
       state = 1;
-      return ;
-    }
-
-    if ((state == 3) && (temperature == TempCold)) {
-      digitalWrite(out_heat, LOW);
-      state = 2;
       return ;
     }
   }
@@ -151,17 +121,14 @@ void Heater::Cycle() {
       // filling
       if (isFull == true) {
         digitalWrite(out_fill, HIGH);
-        digitalWrite(out_heat, LOW);
+        digitalWrite(out_display, LOW);
         state = 2;
       }
       break;
     case 2:
-      // heating
       if (temperature == TempHot) {
-        digitalWrite(out_heat, HIGH);
         state = 3;
       }
-      break;
     case 3:
       // ready
       break;

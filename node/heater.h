@@ -7,16 +7,12 @@
 #define in_fill 5
 #define in_drain 6
 #define in_sensor 7
-#define in_temp A5
+#define in_temp 8
 
 #define out_display A0
 #define out_fill A1
-#define out_heat A3
 #define out_drain A2
-
-#define temp_upper 300
-#define temp_lower 120
-#define numReadings 64
+//#define out_heat A3
 
 #define state_interval 3000 // don't let application switch states so fast
 
@@ -57,13 +53,6 @@ class Heater {
     int _state = 0;
     int temperature;
     bool isFull;
-
-    // ###############################################
-    int readings[numReadings];      // the readings from the analog input
-    int readIndex = 0;              // the index of the current reading
-    int total = 0;                  // the running total
-    int average = 0;                // the average
-    // ###############################################
 };
 
 #endif
