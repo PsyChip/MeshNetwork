@@ -81,7 +81,7 @@ void Heater::ReadTemp() {
     temperature = TempOff;
     return ;
   }
-  temperature = (digitalRead(in_temp) == HIGH ? TempHot : TempCold);
+  temperature = (digitalRead(in_temp) == HIGH ? TempCold : TempHot);
 }
 
 void Heater::ReadSensors() {
