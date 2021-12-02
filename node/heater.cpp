@@ -114,7 +114,7 @@ void Heater::Cycle() {
 
   switch (state) {
     case 0:
-    {}
+      {}
       // standby
       break;
     case 1: {
@@ -132,8 +132,11 @@ void Heater::Cycle() {
         }
       }
       break;
-    case 3:
-    {}
+    case 3: {
+        if (temperature == TempCold) {
+          state = 2;
+        }
+      }
       // ready
       break;
     case 4:
