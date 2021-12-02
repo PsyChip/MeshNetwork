@@ -26,7 +26,8 @@ void loop() {
   h->Cycle();
   n->Cycle();
   if ((millis() - timer) >= 15000) {
-    n->Telemetry_(manager, sState, state);
+    timer = millis();
+    n->Telemetry_(manager, sState, h->state);
   }
   wdt_reset();
 }
