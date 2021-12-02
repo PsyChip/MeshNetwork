@@ -33,7 +33,6 @@ Parser::Parser() {
 int Parser::Poll() {
   unsigned long now = millis();
   if ((now - lastcmd) > timeout && lastcmd > 0) {
-    Serial.flush();
     flush();
   }
 
@@ -42,8 +41,7 @@ int Parser::Poll() {
     if (Receive() == true) {
       int cid = GetCmdId();
       onCommand(cid);
-        Serial.flush();
-      flush();
+      //flush();
       return 2;
     } else {
       return 1;
@@ -72,7 +70,6 @@ void Parser::splitParamInt() {
 boolean Parser::Receive() {
   char incomingByte = (char)Serial.read();
   if (incomingByte == 13) {
-    Serial.flush();
     return parse();
   } else {
     buffer += incomingByte;

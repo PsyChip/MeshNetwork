@@ -3,7 +3,8 @@
 #include "grid.h"
 #include "heater.h"
 
-uint16_t address = 01;
+uint16_t manager = 00;
+uint16_t NodeAddress = 01;
 
 GridNode *n;
 Heater *h;
@@ -11,14 +12,14 @@ Heater *h;
 void setup() {
   delay(100);
   Serial.begin(115200);
-  Serial.println("init node");
   h = new Heater();
-  n = new GridNode(address);
+  n = new GridNode(NodeAddress);
   h->onStateChange = &StateChange;
+
   n->onCommand = &RemoteCommand;
-  n->Send(00, sAc, 1);
+  n->Telemetry_(manager, sAc, 1);
   Watchdog();
-    Serial.println("begin");
+  Serial.println("begin");
 }
 
 void loop() {
@@ -36,22 +37,29 @@ void Watchdog() {
 }
 
 void StateChange(int state) {
-  n->Send(0, sState, state);
+  Serial.println("State changed");
+  n->Telemetry_(manager, sState, state);
 }
 
 void RemoteCommand(Command C) {
+  Serial.println(C.cmd);
   switch (C.cmd) {
-    case CmdStart:
-      h->Start();
+    case CmdStart: {
+        h->Start();
+      }
       break;
-    case CmdStop:
-      h->Stop();
+    case CmdStop: {
+        h->Stop();
+      }
       break;
-    case CmdRain:
-      h->RainEx(C.param);
+    case CmdRain: {
+        h->RainEx(C.param);
+      }
       break;
     case CmdReset:
-      h->Reset();
+      {
+        h->Reset();
+      }
       break;
   }
 }

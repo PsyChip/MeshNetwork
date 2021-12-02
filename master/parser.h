@@ -3,13 +3,13 @@
 
 #include "Arduino.h"
 
-#define cmdLen 4
+#define cmdLen 3
 
 // command format: [command:param<newline char(13)>]
 // case sensitive
 
 const String Commands[cmdLen] = {
-  "cmd", "ping", "list"
+  "cmd", "ping", "solve"
 };
 
 class Parser {

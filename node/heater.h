@@ -12,14 +12,10 @@
 #define out_display A0
 #define out_fill A1
 #define out_drain A2
-<<<<<<< HEAD
-//#define out_heat A3
-=======
 
 #define temp_upper 300
 #define temp_lower 120
 #define numReadings 32
->>>>>>> e5ff3339d3d0fbc9bb881ec3f6cabfdb297aabbe
 
 #define state_interval 3000 // don't let application switch states so fast
 

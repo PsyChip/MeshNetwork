@@ -17,21 +17,16 @@ void Watchdog() {
   WDTCSR = WDTCSR | B01000000;
   MCUSR = MCUSR & B11110111;
 }
-
-const uint16_t __nodeID = 00;
+const uint16_t NodeAddress = 00;
 
 void setup() {
   delay(100);
   Serial.begin(115200);
-  Serial.println("init");
-  n = new GridNode(__nodeID);
-  Serial.println("master init");
+  n = new GridNode(NodeAddress);
   p = new Parser();
-
   n->onAck = &ProcAck;
   n->onPong = &ProcPong;
   n->onTelemetry = &ProcTelemetry;
-
   p->onCommand = &ProcessInput;
   Watchdog();
   Serial.println("ready");
@@ -43,25 +38,35 @@ void loop() {
   wdt_reset();
 }
 
-void ProcessInput(int CmdId) {
-  Serial.println(CmdId);
-  switch (CmdId) {
-    case 1:
-      p->splitParamInt();
-      bool R = n->Send(p->paramsInt[0], p->paramsInt[1], p->paramsInt[2]);
-      Serial.println(R);
-      bool P = n->Ping_(p->paramInt());
-      Serial.println(P);
+void ProcessInput(int cmd) {
+  switch (cmd) {
+
+    case 1: {
+        p->splitParamInt();
+        bool R = n->Command_(p->paramsInt[0], p->paramsInt[1], p->paramsInt[2]);
+        onTx(R, cmd);
+      }
       break;
-    case 2:
-      Serial.print("Sending to:");
-      Serial.println(p->paramInt());
-      //      bool P=n->Ping_(01);
-      //      Serial.println(P);
+    case 2: {
+        bool P = n->Ping_(p->paramInt());
+        onTx(P, cmd);
+      }
       break;
-    case 3:
+    case 3: {
+      }
       break;
+    default:
+      Serial.println("unknown command");
   }
+}
+
+
+void onTx(bool result, int cid) {
+  Serial.print(F("$tx,"));
+  Serial.print(cid);
+  Serial.print(_comma);
+  Serial.print(result);
+  Serial.println(_end);
 }
 
 void ProcAck(Ack A) {

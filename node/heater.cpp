@@ -82,7 +82,6 @@ void Heater::ReadTemp() {
     return ;
   }
   temperature = (digitalRead(in_temp) == HIGH ? TempHot : TempCold);
-  Serial.println(digitalRead(in_temp));
 }
 
 void Heater::ReadSensors() {
@@ -115,24 +114,30 @@ void Heater::Cycle() {
 
   switch (state) {
     case 0:
+    {}
       // standby
       break;
-    case 1:
-      // filling
-      if (isFull == true) {
-        digitalWrite(out_fill, HIGH);
-        digitalWrite(out_display, LOW);
-        state = 2;
+    case 1: {
+        // filling
+        if (isFull == true) {
+          digitalWrite(out_fill, HIGH);
+          digitalWrite(out_display, LOW);
+          state = 2;
+        }
       }
       break;
-    case 2:
-      if (temperature == TempHot) {
-        state = 3;
+    case 2: {
+        if (temperature == TempHot) {
+          state = 3;
+        }
       }
+      break;
     case 3:
+    {}
       // ready
       break;
     case 4:
+      {}
       // draining
       break;
   }
