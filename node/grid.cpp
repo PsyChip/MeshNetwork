@@ -28,10 +28,10 @@ void __GridNodeonTelemetryDef(Telemetry t) {}
 
 GridNode::GridNode(uint16_t nodeId) {
   nodeID = nodeId;
-  radio.setChannel(mesh_channel);
   radio.begin();
+  radio.setChannel(mesh_channel);
   network.begin(nodeID);
-  
+
   onCommand = &__GridNodeonCommandDef;
   onPong = &__GridNodeonPongDef;
   onAck = &__GridNodeonAckDef;
@@ -55,6 +55,8 @@ void GridNode::Ack_(uint16_t addr, int cid, int result) {
 void GridNode::Receive() {
   RF24NetworkHeader header;
   network.peek(header);
+  Serial.print("Received header ");
+  Serial.println(header.type);
   switch (header.type) {
     case idPing:
       Ping p;
@@ -80,6 +82,14 @@ void GridNode::Receive() {
       network.read(header, &z, szAck);
       onAck(z);
       break;
+    default:
+      char data[256];
+      network.read(header, &data, sizeof(data));
+     for(int i=0;i<256;i++) {
+      Serial.print(data[i]);
+      Serial.print(" ");
+     }
+     Serial.println("");
   }
 }
 

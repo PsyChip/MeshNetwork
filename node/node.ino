@@ -9,13 +9,16 @@ GridNode *n;
 Heater *h;
 
 void setup() {
+  delay(100);
+  Serial.begin(115200);
+  Serial.println("init node");
   h = new Heater();
   n = new GridNode(address);
   h->onStateChange = &StateChange;
   n->onCommand = &RemoteCommand;
   n->Send(00, sAc, 1);
   Watchdog();
-  Serial.begin(9600);
+    Serial.println("begin");
 }
 
 void loop() {

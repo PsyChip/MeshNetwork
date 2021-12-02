@@ -18,19 +18,20 @@ void Watchdog() {
   MCUSR = MCUSR & B11110111;
 }
 
-PROGMEM const uint16_t __nodeID = 00;
+const uint16_t __nodeID = 00;
 
 void setup() {
   delay(100);
   Serial.begin(115200);
   Serial.println("init");
   n = new GridNode(__nodeID);
-    Serial.println("node init");
+  Serial.println("master init");
   p = new Parser();
+
   n->onAck = &ProcAck;
   n->onPong = &ProcPong;
   n->onTelemetry = &ProcTelemetry;
-  
+
   p->onCommand = &ProcessInput;
   Watchdog();
   Serial.println("ready");
@@ -43,19 +44,20 @@ void loop() {
 }
 
 void ProcessInput(int CmdId) {
+  Serial.println(CmdId);
   switch (CmdId) {
     case 1:
       p->splitParamInt();
-      bool R=n->Send(p->paramsInt[0], p->paramsInt[1], p->paramsInt[2]);
+      bool R = n->Send(p->paramsInt[0], p->paramsInt[1], p->paramsInt[2]);
       Serial.println(R);
-       bool P=n->Ping_(p->paramInt());
+      bool P = n->Ping_(p->paramInt());
       Serial.println(P);
       break;
     case 2:
-    Serial.print("Sending to:");
-    Serial.println(p->paramInt());
-//      bool P=n->Ping_(01);
-//      Serial.println(P);
+      Serial.print("Sending to:");
+      Serial.println(p->paramInt());
+      //      bool P=n->Ping_(01);
+      //      Serial.println(P);
       break;
     case 3:
       break;
@@ -93,7 +95,7 @@ void ProcTelemetry(Telemetry T) {
 }
 
 void ProcCommand(Command C) {
-Serial.print(F("$cmd,"));
+  Serial.print(F("$cmd,"));
   Serial.print(C.sender);
   Serial.print(_comma);
   Serial.print(C.cmd);

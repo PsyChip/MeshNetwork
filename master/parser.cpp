@@ -40,7 +40,10 @@ int Parser::Poll() {
   if (Serial.available() > 0) {
     lastcmd = now;
     if (Receive() == true) {
-      onCommand(GetCmdId());
+      int cid = GetCmdId();
+      onCommand(cid);
+        Serial.flush();
+      flush();
       return 2;
     } else {
       return 1;

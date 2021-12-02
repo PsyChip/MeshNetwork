@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#define cmdLen 3
+#define cmdLen 4
 
 // command format: [command:param<newline char(13)>]
 // case sensitive
