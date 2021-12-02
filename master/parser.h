@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 
-#define cmdLen 4
+#define cmdLen 3
 
 // command format: [command:param<newline char(13)>]
 // case sensitive
@@ -17,7 +17,7 @@ class Parser {
     Parser();
     int paramInt();
     void splitParamInt();
-    int Poll(unsigned long now);
+    int Poll();
     void (*onCommand)(int CmdId);
     void flush();
     String buffer;

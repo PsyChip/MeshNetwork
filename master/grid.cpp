@@ -21,14 +21,13 @@ PROGMEM const size_t szCommand = sizeof(Command);
 PROGMEM const size_t szPing = sizeof(Ping);
 PROGMEM const size_t szAck = sizeof(Ack);
 
-void __GridNodeonCommandDef(Command C) {}
+void __GridNodeonCommandDef(Command c) {}
 void __GridNodeonPongDef(Pong p) {}
 void __GridNodeonAckDef(Ack a) {}
 void __GridNodeonTelemetryDef(Telemetry t) {}
 
 GridNode::GridNode(uint16_t nodeId) {
   nodeID = nodeId;
-  radio.setPALevel(RF24_PA_HIGH);
   radio.setChannel(mesh_channel);
   radio.begin();
   network.begin(nodeID);
@@ -84,28 +83,28 @@ void GridNode::Receive() {
   }
 }
 
-void GridNode::Send(uint16_t address, int type, int value) {
+boolean GridNode::Send(uint16_t address, int type, int value) {
   Telemetry payload = {type, value};
   RF24NetworkHeader header(address, idTelemetry);
-  network.write(header, &payload, szTelemetry);
+  return network.write(header, &payload, szTelemetry);
 }
 
-void GridNode::Ping_(uint16_t address) {
+boolean GridNode::Ping_(uint16_t address) {
   RF24NetworkHeader header(address, idPing);
   Ping payload = {micros(), 0, false};
-  network.write(header, &payload, szPing);
+  return network.write(header, &payload, szPing);
 }
 
-int GridNode::Command_(uint16_t addr, int cmd, unsigned long param) {
+boolean GridNode::Command_(uint16_t addr, int cmd, unsigned long param) {
   RF24NetworkHeader header(addr, idCommand);
   Command payload = {CommandNr, nodeID, cmd, param};
   unsigned long __crc = BuildCRC(payload);
   payload.crc = __crc;
   if (network.write(header, &payload, szCommand)) {
     CommandNr++;
-    return 1;
+    return true;
   } else {
-    return 0;
+    return false;
   }
 }
 
@@ -135,6 +134,7 @@ void GridNode::ProcessCommand(Command cmd, uint16_t sender) {
     return ;
   }
   lastMsg = cmd.crc;
+  cmd.sender = sender;
   onCommand(cmd);
   Ack_(sender, cmd.id, AckOK);
 }
