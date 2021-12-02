@@ -40,10 +40,11 @@ PROGMEM enum {
   sWeight = 20, // Weight scaler
 
   // payload types
-  idCommand = 1,
-  idAck = 2,
-  idPing = 3,
-  idTelemetry = 4,
+  idCommand = 65,
+  idAck = 66,
+  idPing = 67,
+  idTelemetry = 68,
+
 
   // command results
   AckOK = 1,    // command executed

@@ -16,7 +16,7 @@
 
 #define temp_upper 300
 #define temp_lower 120
-#define numReadings 64
+#define numReadings 32
 
 #define state_interval 3000 // don't let application switch states so fast
 

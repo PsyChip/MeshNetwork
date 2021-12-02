@@ -40,10 +40,10 @@ PROGMEM enum {
   sWeight = 20, // Weight scaler
 
   // payload types
-  idCommand = 1,
-  idAck = 2,
-  idPing = 3,
-  idTelemetry = 4,
+  idCommand = 65,
+  idAck = 66,
+  idPing = 67,
+  idTelemetry = 68,
 
   // command results
   AckOK = 1,    // command executed
@@ -61,7 +61,7 @@ struct Command {
 };
 
 struct Ack {
-  unsigned int sender;
+  uint16_t sender;
   unsigned int cmdId;
   unsigned int result;
 };
@@ -79,6 +79,7 @@ struct Pong {
 };
 
 struct Telemetry {
+  uint16_t sender;
   int type;             // sensor type class
   unsigned long value;  // value
 };
@@ -87,9 +88,9 @@ class GridNode {
   public:
     uint16_t nodeID;
     GridNode(uint16_t nodeId);
-    int Command_(uint16_t address, int cmd, unsigned long param);
-    void Send(uint16_t address, int type, int value);
-    void Ping_(uint16_t address);
+    boolean Command_(uint16_t address, int cmd, unsigned long param);
+    boolean Send(uint16_t address, int type, int value);
+    boolean Ping_(uint16_t address);
     void (*onCommand)(Command C);
     void (*onPong)(Pong p);
     void (*onAck)(Ack a);

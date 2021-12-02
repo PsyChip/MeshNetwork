@@ -30,7 +30,8 @@ Parser::Parser() {
     -2: receiving
 */
 
-int Parser::Poll(unsigned long now) {
+int Parser::Poll() {
+  unsigned long now = millis();
   if ((now - lastcmd) > timeout && lastcmd > 0) {
     Serial.flush();
     flush();

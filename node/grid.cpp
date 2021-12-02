@@ -28,7 +28,6 @@ void __GridNodeonTelemetryDef(Telemetry t) {}
 
 GridNode::GridNode(uint16_t nodeId) {
   nodeID = nodeId;
-  radio.setPALevel(RF24_PA_HIGH);
   radio.setChannel(mesh_channel);
   radio.begin();
   network.begin(nodeID);
