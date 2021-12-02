@@ -91,6 +91,7 @@ void GridNode::Receive() {
     default: {
         byte data[256];
         network.read(header, &data, sizeof(data));
+       /*sr
         Serial.print("$unk,");
         Serial.println(header.type);
         Serial.print(",");
@@ -99,6 +100,7 @@ void GridNode::Receive() {
           Serial.print(" ");
         }
         Serial.println(";");
+        */
       }
       break;
   }

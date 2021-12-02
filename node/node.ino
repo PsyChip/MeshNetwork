@@ -9,9 +9,10 @@ uint16_t NodeAddress = 01;
 GridNode *n;
 Heater *h;
 
+unsigned long timer = 0;
+
 void setup() {
   delay(100);
-  Serial.begin(115200);
   h = new Heater();
   n = new GridNode(NodeAddress);
   h->onStateChange = &StateChange;
@@ -19,12 +20,14 @@ void setup() {
   n->onCommand = &RemoteCommand;
   n->Telemetry_(manager, sAc, 1);
   Watchdog();
-  Serial.println("begin");
 }
 
 void loop() {
   h->Cycle();
   n->Cycle();
+  if ((millis() - timer) >= 15000) {
+    n->Telemetry_(manager, sState, state);
+  }
   wdt_reset();
 }
 
@@ -37,12 +40,10 @@ void Watchdog() {
 }
 
 void StateChange(int state) {
-  Serial.println("State changed");
   n->Telemetry_(manager, sState, state);
 }
 
 void RemoteCommand(Command C) {
-  Serial.println(C.cmd);
   switch (C.cmd) {
     case CmdStart: {
         h->Start();
