@@ -10,7 +10,6 @@
 #define mesh_pin_2 10
 #define mesh_channel 126 // 1-127
 #define network_key 957241
-#define szLayer 5
 
 enum {
   sTime = 1,              // real time clock

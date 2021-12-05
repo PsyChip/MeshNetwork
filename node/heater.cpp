@@ -16,10 +16,9 @@ Heater::Heater() {
   Reset();
   fill = new Button(in_fill, 100, LOW);
   drain = new Button(in_drain, 100, LOW);
-  sensor = new Button(in_sensor, 500, HIGH);
+  sensor = new Button(in_sensor, 750, HIGH);
 
   onStateChange = &__HeaterOnStateChange;
-
   Reset();
 }
 
@@ -29,21 +28,29 @@ void Heater::Start() {
   state = 1;
 }
 
+void Heater::Fill() {
+  if (state != sIdle) {
+    return ;
+  }
+  digitalWrite(out_fill, LOW);
+  state = sFillOnly;
+}
+
 void Heater::Reset() {
   digitalWrite(out_fill, HIGH);
   digitalWrite(out_display, HIGH);
   digitalWrite(out_drain, HIGH);
-  state = 0;
+  state = sIdle;
 }
 
 void Heater::Stop() {
   digitalWrite(out_fill, HIGH);
   digitalWrite(out_display, HIGH);
-  state = 0;
+  state = sIdle;
 }
 
 void Heater::Toggle() {
-  if (state == 0) {
+  if (state == sIdle) {
     Start();
   } else {
     Stop();
@@ -54,10 +61,10 @@ void Heater::Rain() {
   Stop();
   if (digitalRead(out_drain) == HIGH) {
     digitalWrite(out_drain, LOW);
-    state = 4;
+    state = sRain;
   } else {
     digitalWrite(out_drain, HIGH);
-    state = 0;
+    state = sIdle;
   }
 }
 
@@ -65,10 +72,10 @@ void Heater::RainEx(bool _status) {
   Stop();
   if (_status == true) {
     digitalWrite(out_drain, LOW);
-    state = 4;
+    state = sRain;
   } else {
     digitalWrite(out_drain, HIGH);
-    state = 0;
+    state = sIdle;
   }
 }
 
@@ -94,7 +101,7 @@ void Heater::CheckFallBack() {
     if ((state == 2 || state == 3) && isFull == false) {
       digitalWrite(out_display, HIGH);
       digitalWrite(out_fill, LOW);
-      state = 1;
+      state = sFill;
       return ;
     }
   }
@@ -113,35 +120,44 @@ void Heater::Cycle() {
   CheckFallBack();
 
   switch (state) {
-    case 0:
+    case sIdle:
       {}
       // standby
       break;
-    case 1: {
+    case sFill: {
         // filling
         if (isFull == true) {
           digitalWrite(out_fill, HIGH);
           digitalWrite(out_display, LOW);
-          state = 2;
+          state = sHeat;
         }
       }
       break;
-    case 2: {
+    case sHeat: {
         if (temperature == TempHot) {
           state = 3;
         }
       }
       break;
-    case 3: {
+    case sReady: {
         if (temperature == TempCold) {
-          state = 2;
+          state = sHeat;
         }
       }
       // ready
       break;
-    case 4:
+    case sRain:
       {}
       // draining
+      break;
+    case sFillOnly:
+      // Fill & return back to standby
+      {
+        if (isFull == true) {
+          digitalWrite(out_fill, HIGH);
+          state = sIdle;
+        }
+      }
       break;
   }
 

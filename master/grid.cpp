@@ -2,7 +2,7 @@
 #undef PROGMEM
 #define PROGMEM __attribute__((section(".progmem.data")))
 #endif
-
+ 
 #include <Arduino.h>
 #include "grid.h"
 
@@ -31,7 +31,6 @@ GridNode::GridNode(uint16_t address) {
   radio.begin();
   radio.setChannel(mesh_channel);
   network.begin(address);
-
   onCommand = &__GridNodeonCommandDef;
   onPong = &__GridNodeonPongDef;
   onAck = &__GridNodeonAckDef;

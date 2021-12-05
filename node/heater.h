@@ -15,21 +15,24 @@
 
 #define temp_upper 300
 #define temp_lower 120
-#define numReadings 32
-
 #define state_interval 3000 // don't let application switch states so fast
 
-PROGMEM enum {
-  CmdStart = 1,
-  CmdStop = 2,
-  CmdRain = 3,
-  CmdReset = 4,
-  CmdStatus = 5,
-  CmdIdle = 6,
-
+enum {
+  CmdSet = 1,
+  CmdRain = 2,
+  CmdKill = 3,
+  CmdStatus = 4,
+  
   TempOff = 0,
   TempCold = 1,
-  TempHot = 2
+  TempHot = 2,
+
+  sIdle = 0,
+  sFill = 1,
+  sHeat = 2,
+  sReady = 3,
+  sRain = 4,
+  sFillOnly = 5
 };
 
 class Heater {
@@ -39,6 +42,7 @@ class Heater {
     void Start();
     void Stop();
     void Rain();
+    void Fill();
     void RainEx(bool _status);
     void Reset();
     int state = 0;

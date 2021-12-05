@@ -46,21 +46,35 @@ void StateChange(int state) {
 
 void RemoteCommand(Command C) {
   switch (C.cmd) {
-    case CmdStart: {
-        h->Start();
-      }
-      break;
-    case CmdStop: {
-        h->Stop();
+    case CmdSet: {
+        switch (C.param) {
+          case 1: {
+              h->Start();
+            }
+            break;
+          case 2: {
+              h->Stop();
+            }
+            break;
+          case 3: {
+              h->Fill();
+            }
+        }
+        break;
       }
       break;
     case CmdRain: {
         h->RainEx(C.param);
       }
       break;
-    case CmdReset:
+    case CmdKill:
       {
         h->Reset();
+      }
+      break;
+    case CmdStatus:
+      {
+        n->Telemetry_(manager, sState, h->state);
       }
       break;
   }
