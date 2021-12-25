@@ -2,12 +2,9 @@
 #undef PROGMEM
 #define PROGMEM __attribute__((section(".progmem.data")))
 #endif
- 
+
 #include <Arduino.h>
 #include "grid.h"
-
-RF24 radio(mesh_pin_1, mesh_pin_2);
-RF24Network network(radio);
 
 const size_t szTelemetry = sizeof(Telemetry);
 const size_t szCommand = sizeof(Command);
@@ -26,11 +23,19 @@ void __GridNodeonPongDef(Pong p) {}
 void __GridNodeonAckDef(Ack a) {}
 void __GridNodeonTelemetryDef(Telemetry t) {}
 
+RF24 radio(mesh_pin_1, mesh_pin_2);
+RF24Network network(radio);
+
 GridNode::GridNode(uint16_t address) {
   _address = address;
   radio.begin();
-  radio.setChannel(mesh_channel);
-  network.begin(address);
+
+  radio.setAutoAck(true);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.setRetries(1, 50);
+
+  network.begin(mesh_channel, address);
+  network.multicastRelay = true;
   onCommand = &__GridNodeonCommandDef;
   onPong = &__GridNodeonPongDef;
   onAck = &__GridNodeonAckDef;
@@ -42,6 +47,12 @@ void GridNode::Cycle() {
   while (network.available()) {
     Receive();
   }
+}
+
+void GridNode::flush() {
+  radio.flush_tx();
+  delay(1);
+  radio.flush_rx();
 }
 
 void GridNode::Ack_(uint16_t address, unsigned int cid,  unsigned int result) {
@@ -147,7 +158,7 @@ void GridNode::ProcessCommand(Command cmd, uint16_t sender) {
     Ack_(sender, cmd.id, AckSpf);
     return ;
   }
-  if (cmd.crc == lastMsg) {
+  if (cmd.crc == lastCmd) {
     Ack_(sender, cmd.id, AckRep);
     return ;
   }
@@ -157,7 +168,7 @@ void GridNode::ProcessCommand(Command cmd, uint16_t sender) {
     return ;
   }
   Ack_(sender, cmd.id, AckOK);
-  lastMsg = cmd.crc;
+  lastCmd = cmd.crc;
   cmd.sender = sender;
   onCommand(cmd);
 }

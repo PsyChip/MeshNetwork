@@ -13,7 +13,8 @@ Button::Button(int _pin, int treshold, int NCstate) {
   nc = NCstate;
 }
 
-boolean Button::Poll(unsigned long now) {
+boolean Button::Poll() {
+  unsigned long now = millis();
   state = digitalRead(pin);
   boolean res = false;
   if (state != lastState) {
@@ -31,7 +32,8 @@ boolean Button::Poll(unsigned long now) {
 }
 
 
-boolean Button::ReadPin(unsigned long now) {
+boolean Button::ReadPin() {
+  unsigned long now = millis();
   state = (digitalRead(pin) == nc ? true : false);
   if (((now - cps) >= debounceDelay) && state == cfs) {
     return state;

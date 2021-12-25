@@ -9,7 +9,7 @@
 // case sensitive
 
 const String Commands[cmdLen] = {
-  "cmd", "ping", "solve"
+  "cmd", "ping", "flush"
 };
 
 class Parser {

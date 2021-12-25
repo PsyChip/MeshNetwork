@@ -36,10 +36,11 @@ enum {
   sECG = 19,              // ECG Heart rate
   sWeight = 20,           // Weight scaler
 
-  idCommand = 65,
-  idAck = 10,
-  idPing = 11,
-  idTelemetry = 68,
+  idCommand = 65,         // Secure command with key
+  idAck = 66,             // Command ACK
+  idPing = 67,            // Ping
+  idTelemetry = 68,       // Single Sensor Value
+  idTelemetrySet = 69,    // Multi Sensor Value
 
   AckOK = 1,    // command executed
   AckFail = 2,  // command received but cant processed
@@ -48,7 +49,7 @@ enum {
   AckSpf = 5    // Source address mismatch
 };
 
-struct Command {
+struct __attribute__((packed)) Command {
   unsigned long id;     // command number
   uint16_t sender;      // sender address
   unsigned int cmd;     // command
@@ -56,25 +57,25 @@ struct Command {
   unsigned long crc;    // integrity check
 };
 
-struct Ack {
+struct __attribute__((packed)) Ack {
   uint16_t sender;
   unsigned int cmdId;
   unsigned int result;
 };
 
-struct Ping {
+struct __attribute__((packed)) Ping {
   unsigned long nanosec;
   unsigned long uptime;
   bool pong;
 };
 
-struct Pong {
+struct __attribute__((packed)) Pong {
   uint16_t sender;
   unsigned int ttl;
   unsigned long uptime;
 };
 
-struct Telemetry {
+struct __attribute__((packed)) Telemetry {
   uint16_t sender;
   unsigned int type;             // sensor type class
   unsigned long value;           // value
@@ -92,11 +93,12 @@ class GridNode {
     void (*onAck)(Ack a);
     void (*onTelemetry)(Telemetry t);
     void Cycle();
+    void flush();
   private:
-    unsigned long count_ = 1;
+    unsigned long count_ = 1;             // Command Count
+    unsigned long _crc[4];                // Checksum buffer
+    unsigned long lastCmd;                // Last received command
     unsigned long BuildCRC(Command cmd);
-    unsigned long _crc[4];
-    unsigned long lastMsg;
     void ProcessCommand(Command cmd, uint16_t sender);
     void Ack_(uint16_t address, unsigned int cid,  unsigned int result);
     void Receive();

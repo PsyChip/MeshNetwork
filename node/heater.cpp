@@ -16,7 +16,7 @@ Heater::Heater() {
   Reset();
   fill = new Button(in_fill, 100, LOW);
   drain = new Button(in_drain, 100, LOW);
-  sensor = new Button(in_sensor, 750, HIGH);
+  sensor = new Button(in_sensor, 2000, HIGH);
 
   onStateChange = &__HeaterOnStateChange;
   Reset();
@@ -93,7 +93,7 @@ void Heater::ReadTemp() {
 
 void Heater::ReadSensors() {
   ReadTemp();
-  isFull = sensor->ReadPin(millis());
+  isFull = sensor->ReadPin();
 }
 
 void Heater::CheckFallBack() {
@@ -108,11 +108,10 @@ void Heater::CheckFallBack() {
 }
 
 void Heater::Cycle() {
-  unsigned long now = millis();
-  if (fill->Poll(now) == true) {
+  if (fill->Poll() == true) {
     Toggle();
   }
-  if (drain->Poll(now) == true) {
+  if (drain->Poll() == true) {
     Rain();
   }
 
@@ -162,7 +161,7 @@ void Heater::Cycle() {
   }
 
   if (state != _state) {
-    StateChange = now;
+    StateChange = millis();
     _state = state;
     onStateChange(state);
   }

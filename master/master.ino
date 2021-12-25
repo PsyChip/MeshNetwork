@@ -10,14 +10,6 @@ Parser *p;
 #define _comma F(",")
 #define _end F(";")
 
-
-void Watchdog() {
-  MCUSR = MCUSR & B11110111;
-  WDTCSR = WDTCSR | B00011000;
-  WDTCSR = B00100001;
-  WDTCSR = WDTCSR | B01000000;
-  MCUSR = MCUSR & B11110111;
-}
 const uint16_t NodeAddress = 00;
 
 void setup() {
@@ -33,15 +25,20 @@ void setup() {
   Serial.println("ready");
 }
 
+unsigned long timer = 0;
+
 void loop() {
   n->Cycle();
   p->Poll();
+  if((millis()-timer)>=3000) {
+    timer = millis();
+    n->Ping_(01);
+  }
   wdt_reset();
 }
 
 void ProcessInput(int cmd) {
   switch (cmd) {
-
     case 1: {
         p->splitParamInt();
         bool R = n->Command_(p->paramsInt[0], p->paramsInt[1], p->paramsInt[2]);
@@ -54,6 +51,8 @@ void ProcessInput(int cmd) {
       }
       break;
     case 3: {
+        n->flush();
+        Serial.println("Flushed");
       }
       break;
     default:
@@ -108,5 +107,12 @@ void ProcCommand(Command C) {
   Serial.print(_comma);
   Serial.print(C.param);
   Serial.println(_end);
+}
 
+void Watchdog() {
+  MCUSR = MCUSR & B11110111;
+  WDTCSR = WDTCSR | B00011000;
+  WDTCSR = B00100001;
+  WDTCSR = WDTCSR | B01000000;
+  MCUSR = MCUSR & B11110111;
 }

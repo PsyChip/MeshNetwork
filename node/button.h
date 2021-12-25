@@ -6,8 +6,8 @@
 class Button {
   public:
     Button(int _pin, int treshold, int NCstate);
-    boolean Poll(unsigned long now);    // used for buttons
-    boolean ReadPin(unsigned long now); // used for mechanical sensors
+    boolean Poll();    // used for buttons
+    boolean ReadPin(); // used for mechanical sensors
     
     int pin;
     boolean state;
