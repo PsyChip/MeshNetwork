@@ -1,8 +1,3 @@
-#ifdef PROGMEM
-#undef PROGMEM
-#define PROGMEM __attribute__((section(".progmem.data")))
-#endif
-
 #include <Arduino.h>
 #include "grid.h"
 
@@ -91,15 +86,15 @@ void GridNode::Receive() {
     default: {
         byte data[256];
         network.read(header, &data, sizeof(data));
-       /*sr
-        Serial.print("$unk,");
-        Serial.println(header.type);
-        Serial.print(",");
-        for (int i = 0; i < 256; i++) {
-          Serial.print(char(data[i]));
-          Serial.print(" ");
-        }
-        Serial.println(";");
+        /*sr
+          Serial.print("$unk,");
+          Serial.println(header.type);
+          Serial.print(",");
+          for (int i = 0; i < 256; i++) {
+           Serial.print(char(data[i]));
+           Serial.print(" ");
+          }
+          Serial.println(";");
         */
       }
       break;

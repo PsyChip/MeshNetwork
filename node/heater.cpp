@@ -1,8 +1,3 @@
-#ifdef PROGMEM
-#undef PROGMEM
-#define PROGMEM __attribute__((section(".progmem.data")))
-#endif
-
 #include <Arduino.h>
 #include "heater.h"
 
@@ -16,7 +11,7 @@ Heater::Heater() {
   Reset();
   fill = new Button(in_fill, 100, LOW);
   drain = new Button(in_drain, 100, LOW);
-  sensor = new Button(in_sensor, 2000, HIGH);
+  sensor = new Button(in_sensor, 2500, HIGH);
 
   onStateChange = &__HeaterOnStateChange;
   Reset();
