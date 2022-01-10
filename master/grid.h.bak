@@ -81,6 +81,7 @@ struct __attribute__((packed)) Telemetry {
   unsigned long value;           // value
 };
 
+
 class GridNode {
   public:
     uint16_t _address;

@@ -3,7 +3,6 @@
 
 RF24 radio(mesh_pin_1, mesh_pin_2);
 RF24Network network(radio);
-
 const size_t szTelemetry = sizeof(Telemetry);
 const size_t szCommand = sizeof(Command);
 const size_t szPing = sizeof(Ping);
@@ -20,13 +19,15 @@ void __GridNodeonCommandDef(Command c) {}
 void __GridNodeonPongDef(Pong p) {}
 void __GridNodeonAckDef(Ack a) {}
 void __GridNodeonTelemetryDef(Telemetry t) {}
-
 GridNode::GridNode(uint16_t address) {
   _address = address;
   radio.begin();
-  radio.setChannel(mesh_channel);
-  network.begin(address);
+  radio.setAutoAck(true);
+  radio.setPALevel(RF24_PA_MAX);
+  radio.setRetries(1, 50);
 
+  network.begin(mesh_channel, address);
+  network.multicastRelay = true;
   onCommand = &__GridNodeonCommandDef;
   onPong = &__GridNodeonPongDef;
   onAck = &__GridNodeonAckDef;
@@ -40,6 +41,11 @@ void GridNode::Cycle() {
   }
 }
 
+void GridNode::flush() {
+  radio.flush_tx();
+  delay(1);
+  radio.flush_rx();
+}
 void GridNode::Ack_(uint16_t address, unsigned int cid,  unsigned int result) {
   Ack a = {_address, cid, result};
   RF24NetworkHeader _header(address, idAck);
@@ -86,17 +92,15 @@ void GridNode::Receive() {
     default: {
         byte data[256];
         network.read(header, &data, sizeof(data));
-        /*sr
-          Serial.print("$unk,");
-          Serial.println(header.type);
-          Serial.print(",");
-          for (int i = 0; i < 256; i++) {
-           Serial.print(char(data[i]));
-           Serial.print(" ");
-          }
-          Serial.println(";");
-        */
-      }
+        Serial.print("$unk,");
+        Serial.println(header.type);
+        Serial.print(",");
+        for (int i = 0; i < 256; i++) {
+          Serial.print(char(data[i]));
+          Serial.print(" ");
+        }
+        Serial.println(";");
+       }
       break;
   }
 }
@@ -145,7 +149,7 @@ void GridNode::ProcessCommand(Command cmd, uint16_t sender) {
     Ack_(sender, cmd.id, AckSpf);
     return ;
   }
-  if (cmd.crc == lastMsg) {
+  if (cmd.crc == lastCmd) {
     Ack_(sender, cmd.id, AckRep);
     return ;
   }
@@ -155,7 +159,7 @@ void GridNode::ProcessCommand(Command cmd, uint16_t sender) {
     return ;
   }
   Ack_(sender, cmd.id, AckOK);
-  lastMsg = cmd.crc;
+  lastCmd = cmd.crc;
   cmd.sender = sender;
   onCommand(cmd);
 }

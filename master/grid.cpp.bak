@@ -99,8 +99,7 @@ void GridNode::Receive() {
           Serial.print(char(data[i]));
           Serial.print(" ");
         }
-        Serial.println(";");
-       }
+        Serial.println(";");      }
       break;
   }
 }

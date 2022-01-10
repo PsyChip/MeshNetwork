@@ -3,6 +3,7 @@
 
 RF24 radio(mesh_pin_1, mesh_pin_2);
 RF24Network network(radio);
+
 const size_t szTelemetry = sizeof(Telemetry);
 const size_t szCommand = sizeof(Command);
 const size_t szPing = sizeof(Ping);
